@@ -1,31 +1,25 @@
 version: 0.2
 
-env:
-  variables:
-    TF_INPUT: "0"
-    TF_IN_AUTOMATION: "YES"
-    
 phases:
   install:
-    runtime-versions:
-      nodejs: latest
     commands:
-      - cd /usr/bin
-      - curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION_INSTALL}/terraform_${TF_VERSION_INSTALL}_linux_amd64.zip
-      - unzip terraform.zip
-      - cd "$CODEBUILD_SRC_DIR"
-      - chmod a+x *.sh
-      - cp ./terraform_actions.sh /usr/bin
-
+      - echo Installing Node 12...
+      - curl -sL https://deb.nodesource.com/setup_12.x | bash -
+      - apt install -y nodejs
+      - echo Installing Yarn...
+      - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+      - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+      - apt install --no-install-recommends yarn
+  pre_build:
+    commands:
+      - echo Installing dependencies...
+      - yarn
   build:
     commands:
-      - cd "$CODEBUILD_SRC_DIR"
-      - terraform version
-      - terraform init -backend-config="bucket=${TF_BUCKET}" -backend-config="region=${TF_REGION}" -backend-config="dynamodb_table=${TF_TABLE}"
-      - echo ${TF_ACTION}
-      - terraform_actions.sh
-
+      - echo Building...
+      - yarn build
 artifacts:
   files:
-    - tf_output.txt
-
+    - "**/*"
+  discard-paths: no
+  base-directory: build
