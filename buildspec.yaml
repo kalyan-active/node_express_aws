@@ -1,5 +1,10 @@
 version: 0.2
 
+env:
+  variables:
+    TF_INPUT: "0"
+    TF_IN_AUTOMATION: "YES"
+
 phases:
   install:
     runtime-versions:
